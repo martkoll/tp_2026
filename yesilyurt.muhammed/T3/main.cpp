@@ -6,6 +6,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <set>
 
 struct Point
 {
@@ -47,21 +48,31 @@ std::istream& operator>>(std::istream& in, Polygon& poly)
 
   poly.points.clear();
 
-  for (std::size_t i = 0; i < count; ++i)
+  std::set< std::pair< int, int > > uniquePoints;
+
+for (std::size_t i = 0; i < count; ++i)
+{
+  Point p;
+  in >> p;
+
+  if (!in)
   {
-    Point p;
-    in >> p;
-
-    if (!in)
-    {
-      in.setstate(std::ios::failbit);
-      return in;
-    }
-
-    poly.points.push_back(p);
+    in.setstate(std::ios::failbit);
+    return in;
   }
 
-  return in;
+  if (uniquePoints.count({ p.x, p.y }) > 0)
+  {
+    in.setstate(std::ios::failbit);
+    return in;
+  }
+
+  uniquePoints.insert({ p.x, p.y });
+
+  poly.points.push_back(p);
+}
+
+return in;
 }
 
 double getArea(const Polygon& poly)
